@@ -543,7 +543,7 @@ renderWarlords();
 
 /* ===== ENVOI BATAILLE VERS GITHUB ===== */
 async function sendBattleToGitHub(data) {
-  await fetch("https://campagne-compensator-api.workers.dev", {
+  await fetch("https://compensator.guillaume-fauno.workers.dev/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
