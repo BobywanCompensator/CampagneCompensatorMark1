@@ -220,8 +220,7 @@ async function loadWarlordsFromCSV() {
 
   lines.forEach(line => {
     const [id, nom, joueur, actif] =
-      line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)
-          .map(v => v.replace(/^"|"$/g, ""));
+      const [id, nom, joueur, actif] = values.map(v => v.trim());
 
     if (actif === "1" && nom) {
       warlords.push(nom);
