@@ -192,6 +192,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background:rep
 
 <script>
 /* ===== GITHUB CONFIG ===== */
+  function cleanCSV(value) {
+  return (value || "")
+    .trim()
+    .replace(/^"(.*)"$/, "$1"); // enlève les guillemets externes
+}
+
 const GITHUB_USER = "BobywanCompensator";
 const GITHUB_REPO = "CampagneCompensatorMark1";
 const SCALE = 0.85;
@@ -677,18 +683,25 @@ async function loadBattlesFromCSV() {
 
 function applyBattles(battles) {
   battles.forEach(b => {
-    const sector = sectors.find(s => s.name === b.secteur);
+    const secteur = cleanCSV(b.secteur);
+    const attaquant = cleanCSV(b.attaquant);
+    const defenseur = cleanCSV(b.defenseur);
+    const factionAtt = cleanCSV(b.faction_attaquant);
+    const resultat = cleanCSV(b.resultat);
+
+    const sector = sectors.find(s => s.name === secteur);
     if (!sector || sector.immutable) return;
 
     sector.battles++;
 
-    if (b.resultat === "Victoire Attaquant") {
-      sector.owner = b.faction_attaquant;
-      if (warlordStats[b.attaquant]) warlordStats[b.attaquant].win++;
-      if (warlordStats[b.defenseur]) warlordStats[b.defenseur].loss++;
+    if (resultat === "Victoire Attaquant") {
+      sector.owner = factionAtt;
+
+      if (warlordStats[attaquant]) warlordStats[attaquant].win++;
+      if (warlordStats[defenseur]) warlordStats[defenseur].loss++;
     } else {
-      if (warlordStats[b.attaquant]) warlordStats[b.attaquant].loss++;
-      if (warlordStats[b.defenseur]) warlordStats[b.defenseur].win++;
+      if (warlordStats[attaquant]) warlordStats[attaquant].loss++;
+      if (warlordStats[defenseur]) warlordStats[defenseur].win++;
     }
   });
 }
