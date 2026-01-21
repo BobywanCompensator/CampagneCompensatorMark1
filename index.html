@@ -191,6 +191,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background:rep
 </div>
 
 <script>
+/* ===== GITHUB CONFIG ===== */
+const GITHUB_USER = "BobywanCompensator;
+const GITHUB_REPO = "CampagneCompensatorMark1";
+const GITHUB_TOKEN = "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";
+
 /* ===== UTILITAIRES ===== */
 const rad=a=>a*Math.PI/180;
 const polar=(r,a)=>({x:r*Math.cos(rad(a)),y:r*Math.sin(rad(a))});
@@ -480,7 +485,7 @@ function openBattleConsole(sector){
     entry.innerHTML=`<div>${lines[0]}</div><div>${lines[1]}</div><div>${lines[2]}</div>`;
     j.prepend(entry);
 sendBattleToGitHub({
-  date: new Date().toISOString(),
+ sendBattleToGitHub({
   secteur: sector.name,
   attaquant: atk,
   defenseur: def,
@@ -512,7 +517,6 @@ sendBattleToGitHub({
     entry.innerHTML=`<div>${lines[0]}</div><div>${lines[1]}</div><div>${lines[2]}</div>`;
     j.prepend(entry);
 sendBattleToGitHub({
-  date: new Date().toISOString(),
   secteur: sector.name,
   attaquant: atk,
   defenseur: def,
@@ -538,14 +542,16 @@ sendBattleToGitHub({
 render();
 renderWarlords();
 
+/* ===== ENVOI BATAILLE VERS GITHUB ===== */
 async function sendBattleToGitHub(data) {
   await fetch(
-    "https://api.github.com/repos/BobywanCompensator/CampagneCompensatorMark1/dispatches",
+    `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/dispatches`,
     {
       method: "POST",
       headers: {
         "Accept": "application/vnd.github+json",
-        "Authorization": "token " + GITHUB_TOKEN
+        "Authorization": `Bearer ${GITHUB_TOKEN}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         event_type: "nouvelle_bataille",
@@ -554,6 +560,7 @@ async function sendBattleToGitHub(data) {
     }
   );
 }
+
 
 </script>
 </body>
