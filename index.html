@@ -296,6 +296,25 @@ function narrate(sector,atkW,defW,atkFaction,defFaction,atkWin){
     : pick(resultDefWin).replace('{faction}',defFaction);
   return [`[${title}]`,intro,result];
 }
+function buildJournalFromBattles(battles) {
+  const journal = document.getElementById("journal");
+  journal.innerHTML = "";
+
+  battles.forEach(b => {
+    // Compatibilité anciennes lignes (sans texte stocké)
+    if (!b.titre || !b.intro || !b.conclusion) return;
+
+    const entry = document.createElement("div");
+    entry.className = "journal-entry";
+    entry.innerHTML = `
+      <div>${b.titre}</div>
+      <div>${b.intro}</div>
+      <div>${b.conclusion}</div>
+    `;
+
+    journal.appendChild(entry);
+  });
+}
 
 /* ===== GEOMETRIE ===== */
 function sectorPath(r1,r2,a1,a2){
@@ -557,6 +576,7 @@ async function loadBattlesFromCSV() {
   });
 
   applyBattles(battles);
+  buildJournalFromBattles(battles);
 }
 function applyBattles(battles) {
   battles.forEach(b => {
