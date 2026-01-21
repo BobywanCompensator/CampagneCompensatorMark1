@@ -194,7 +194,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background:rep
 /* ===== GITHUB CONFIG ===== */
 const GITHUB_USER = "BobywanCompensator";
 const GITHUB_REPO = "CampagneCompensatorMark1";
-const GITHUB_TOKEN = "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";
+
 
 /* ===== UTILITAIRES ===== */
 const rad=a=>a*Math.PI/180;
@@ -543,22 +543,13 @@ renderWarlords();
 
 /* ===== ENVOI BATAILLE VERS GITHUB ===== */
 async function sendBattleToGitHub(data) {
-  await fetch(
-    `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/dispatches`,
-    {
-      method: "POST",
-      headers: {
-        "Accept": "application/vnd.github+json",
-        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        event_type: "nouvelle_bataille",
-        client_payload: data
-      })
-    }
-  );
+  await fetch("https://campagne-compensator-api.workers.dev", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
 }
+
 
 
 </script>
