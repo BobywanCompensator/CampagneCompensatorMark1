@@ -359,8 +359,17 @@ async function loadInitialSectors() {
   const initialOwners = {};
 
   lines.forEach(line => {
-    const [nom, owner] = line.split(",").map(v => v.trim());
-    initialOwners[nom] = owner;
+    if (!line.trim()) return; // sécurité ligne vide
+
+    const parts = line.split(",");
+    if (parts.length < 2) return;
+
+    const nom = parts[0].trim();
+    const owner = parts[1].trim();
+
+    if (nom && owner) {
+      initialOwners[nom] = owner;
+    }
   });
 
   sectors.forEach(s => {
