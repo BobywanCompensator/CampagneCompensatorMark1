@@ -194,7 +194,22 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background:rep
 /* ===== GITHUB CONFIG ===== */
 const GITHUB_USER = "BobywanCompensator";
 const GITHUB_REPO = "CampagneCompensatorMark1";
-
+const SCALE = 0.85;
+const sectorNames=[
+  'ANUS ASTRALIS','LOSER PRIME','PAR KING','GOT CHA FISDEPUS',
+  'REROLL SANCTUM','WYS IWYG I','SPHINCTER PRIME','ORIFICIUS SACRALIS',
+  'CHAR ZADOUZ','EJACTUS PRECOR','PRE PHUS TRANCHIS','SILLON KIPUS',
+  'CHATUS COCUS','DACAPREPUS','DEFAITIS CONTESTATUS','MALA LANUS',
+  'SALIS ETERNUM','RELIQUA POSTERIOR','TESSUR?','ULTIMA FISSURA'
+];
+const sectors=[{
+  name:'TROU SALÉ DE LA CHOUINE ÉTERNELLE',
+  owner:'Neutral',
+  immutable:true,
+  isCenter:true,
+  r:90*SCALE,
+  battles:0
+}];
 
 /* ===== UTILITAIRES ===== */
 const rad=a=>a*Math.PI/180;
