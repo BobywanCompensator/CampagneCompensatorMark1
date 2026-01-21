@@ -485,13 +485,18 @@ function openBattleConsole(sector){
     entry.innerHTML=`<div>${lines[0]}</div><div>${lines[1]}</div><div>${lines[2]}</div>`;
     j.prepend(entry);
 sendBattleToGitHub({
+  date: new Date().toISOString(),
   secteur: sector.name,
   attaquant: atk,
   defenseur: def,
   faction_attaquant: atkFaction,
   faction_defenseur: oldOwner,
-  resultat: "Victoire Attaquant"
+  resultat: "Victoire Attaquant",
+  titre: lines[0],
+  intro: lines[1],
+  conclusion: lines[2]
 });
+
 
     e.remove();
     battleOpen=false;
