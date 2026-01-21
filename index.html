@@ -538,7 +538,7 @@ sendBattleToGitHub({
   j.prepend(e);
 }
 async function loadBattlesFromCSV() {
-  const res = await fetch("data/batailles.csv");
+  const res = await fetch("https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/batailles.csv");
   const text = await res.text();
 
   const lines = text.trim().split("\n");
