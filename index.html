@@ -657,14 +657,15 @@ function applyBattles(battles) {
   });
 }
 
-Promise.all([
-  loadWarlordsFromCSV(),
-  loadInitialSectors(),
-  loadBattlesFromCSV()
-]).then(() => {
+(async () => {
+  await loadWarlordsFromCSV();
+  await loadInitialSectors();
+  await loadBattlesFromCSV();
+
   render();
   renderWarlords();
-});
+})();
+
 
 
 
