@@ -352,6 +352,28 @@ function sectorPath(r1,r2,a1,a2){
 }
 
 /* ===== DONNÉES ===== */
+
+
+function makeRing(r1,r2,count){
+  r1*=SCALE; r2*=SCALE;
+  let w=[],t=0;
+  for(let i=0;i<count;i++){let v=1+(Math.random()-.5)*.3;w.push(v);t+=v;}
+  let a=Math.random()*360;
+  for(let i=0;i<count;i++){
+    let s=360*(w[i]/t);
+    sectors.push({
+      name:sectorNames[sectors.length%sectorNames.length],
+      owner:factions[i%3],
+      r1,r2,a1:a,a2:a+s,
+      battles:0
+    });
+    a+=s;
+  }
+}
+makeRing(90,190,3);
+makeRing(190,320,6);
+makeRing(320,500,9);
+
 async function loadInitialSectors() {
   const res = await fetch(
     "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/sectors.csv"
@@ -383,43 +405,8 @@ async function loadInitialSectors() {
     }
   });
 }
-
   
-const sectorNames=[
-'ANUS ASTRALIS','LOSER PRIME','PAR KING','GOT CHA FISDEPUS',
-'REROLL SANCTUM','WYS IWYG I','SPHINCTER PRIME','ORIFICIUS SACRALIS',
-'CHAR ZADOUZ','EJACTUS PRECOR','PRE PHUS TRANCHIS','SILLON KIPUS',
-'CHATUS COCUS','DACAPREPUS','DEFAITIS CONTESTATUS','MALA LANUS',
-'SALIS ETERNUM','RELIQUA POSTERIOR','TESSUR?','ULTIMA FISSURA'
-];
-
-const SCALE=0.85;
-const sectors=[{
-  name:'TROU SALÉ DE LA CHOUINE ÉTERNELLE',
-  owner:'Neutral',immutable:true,isCenter:true,
-  r:90*SCALE,battles:0
-}];
-
-function makeRing(r1,r2,count){
-  r1*=SCALE; r2*=SCALE;
-  let w=[],t=0;
-  for(let i=0;i<count;i++){let v=1+(Math.random()-.5)*.3;w.push(v);t+=v;}
-  let a=Math.random()*360;
-  for(let i=0;i<count;i++){
-    let s=360*(w[i]/t);
-    sectors.push({
-      name:sectorNames[sectors.length%sectorNames.length],
-      owner:factions[i%3],
-      r1,r2,a1:a,a2:a+s,
-      battles:0
-    });
-    a+=s;
-  }
-}
-makeRing(90,190,3);
-makeRing(190,320,6);
-makeRing(320,500,9);
-
+  
 /* ===== RENDU ===== */
 function render(){
   const svg=document.getElementById('galaxy');
