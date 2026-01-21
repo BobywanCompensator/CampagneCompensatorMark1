@@ -537,9 +537,45 @@ sendBattleToGitHub({
 
   j.prepend(e);
 }
+async function loadBattlesFromCSV() {
+  const res = await fetch("data/batailles.csv");
+  const text = await res.text();
 
-render();
-renderWarlords();
+  const lines = text.trim().split("\n");
+  const headers = lines.shift().split(",");
+
+  const battles = lines.map(line => {
+    const values = line.split(",");
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = values[i]);
+    return obj;
+  });
+
+  applyBattles(battles);
+}
+function applyBattles(battles) {
+  battles.forEach(b => {
+    const sector = sectors.find(s => s.name === b.secteur);
+    if (!sector || sector.immutable) return;
+
+    sector.battles++;
+
+    if (b.resultat === "Victoire Attaquant") {
+      sector.owner = b.faction_attaquant;
+      if (warlordStats[b.attaquant]) warlordStats[b.attaquant].win++;
+      if (warlordStats[b.defenseur]) warlordStats[b.defenseur].loss++;
+    } else {
+      if (warlordStats[b.attaquant]) warlordStats[b.attaquant].loss++;
+      if (warlordStats[b.defenseur]) warlordStats[b.defenseur].win++;
+    }
+  });
+}
+
+loadBattlesFromCSV().then(() => {
+  render();
+  renderWarlords();
+});
+
 
 /* ===== ENVOI BATAILLE VERS GITHUB ===== */
 async function sendBattleToGitHub(data) {
