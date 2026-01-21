@@ -1,0 +1,25 @@
+name: Enregistrer une bataille
+
+on:
+  repository_dispatch:
+    types: [nouvelle_bataille]
+
+jobs:
+  update-csv:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Ajouter la bataille au CSV
+        run: |
+          echo "$(date -u +'%Y-%m-%dT%H:%M:%SZ'),${{ github.event.client_payload.secteur }},${{ github.event.client_payload.attaquant }},${{ github.event.client_payload.defenseur }},${{ github.event.client_payload.faction_attaquant }},${{ github.event.client_payload.faction_defenseur }},${{ github.event.client_payload.resultat }}" >> data/batailles.csv
+
+      - name: Commit automatique
+        run: |
+          git config user.name "Campagne Bot"
+          git config user.email "bot@github"
+          git add data/batailles.csv
+          git commit -m "Nouvelle bataille enregistrée"
+          git push
