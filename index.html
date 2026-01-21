@@ -204,9 +204,33 @@ const factions=['Imperium','Chaos','Xenos'];
 let battleOpen=false; // verrou interaction carte
 
 /* ===== WARLORDS ===== */
-const warlords=['Inconnu','Jo El-Johnson','Dacapala','Le Putride Grognon','Qui pour un TTS ce matin?'];
-const warlordStats={};
-warlords.forEach(w=>warlordStats[w]={win:0,loss:0});
+let warlords = [];               // noms des seigneurs (pour les <select>)
+const warlordStats = {};         // stats par nom
+const warlordPlayers = {};       // lien seigneur → joueur
+async function loadWarlordsFromCSV() {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/warlords.csv"
+  );
+  const text = await res.text();
+
+  const lines = text.trim().split("\n");
+  lines.shift(); // header
+
+  warlords = [];
+
+  lines.forEach(line => {
+    const [id, nom, joueur, actif] =
+      line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)
+          .map(v => v.replace(/^"|"$/g, ""));
+
+    if (actif === "1" && nom) {
+      warlords.push(nom);
+      warlordStats[nom] = { win: 0, loss: 0 };
+      warlordPlayers[nom] = joueur || "";
+    }
+  });
+}
+
 
 function validWarlords(a,d){
   if(a==='Inconnu'||d==='Inconnu') return true;
@@ -596,10 +620,14 @@ function applyBattles(battles) {
   });
 }
 
-loadBattlesFromCSV().then(() => {
+Promise.all([
+  loadWarlordsFromCSV(),
+  loadBattlesFromCSV()
+]).then(() => {
   render();
   renderWarlords();
 });
+
 
 
 /* ===== ENVOI BATAILLE VERS GITHUB ===== */
