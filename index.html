@@ -219,8 +219,12 @@ async function loadWarlordsFromCSV() {
   warlords = [];
 
   lines.forEach(line => {
-    const [id, nom, joueur, actif] =
-      const [id, nom, joueur, actif] = values.map(v => v.trim());
+    if (!line.trim()) return;
+
+    const values = line.split(",");
+    if (values.length < 4) return;
+
+    const [id, nom, joueur, actif] = values.map(v => v.trim());
 
     if (actif === "1" && nom) {
       warlords.push(nom);
@@ -229,6 +233,7 @@ async function loadWarlordsFromCSV() {
     }
   });
 }
+
 
 
 function validWarlords(a,d){
