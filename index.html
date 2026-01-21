@@ -347,6 +347,30 @@ function sectorPath(r1,r2,a1,a2){
 }
 
 /* ===== DONNÉES ===== */
+async function loadInitialSectors() {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/sectors.csv"
+  );
+  const text = await res.text();
+
+  const lines = text.trim().split("\n");
+  lines.shift(); // header
+
+  const initialOwners = {};
+
+  lines.forEach(line => {
+    const [nom, owner] = line.split(",").map(v => v.trim());
+    initialOwners[nom] = owner;
+  });
+
+  sectors.forEach(s => {
+    if (initialOwners[s.name]) {
+      s.owner = initialOwners[s.name];
+    }
+  });
+}
+
+  
 const sectorNames=[
 'ANUS ASTRALIS','LOSER PRIME','PAR KING','GOT CHA FISDEPUS',
 'REROLL SANCTUM','WYS IWYG I','SPHINCTER PRIME','ORIFICIUS SACRALIS',
@@ -621,11 +645,13 @@ function applyBattles(battles) {
 
 Promise.all([
   loadWarlordsFromCSV(),
+  loadInitialSectors(),
   loadBattlesFromCSV()
 ]).then(() => {
   render();
   renderWarlords();
 });
+
 
 
 
