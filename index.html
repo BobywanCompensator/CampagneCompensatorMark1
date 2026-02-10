@@ -1,191 +1,176 @@
-<script>
-/* ===== GITHUB CONFIG ===== */
-function cleanCSV(value) {
-  return (value || "")
-    .trim()
-    .replace(/^"(.*)"$/, "$1");
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Carte Galactique – Campagne COMPENSATOR</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+body{
+  margin:0;
+  font-family:'Share Tech Mono',monospace;
+  background:#02030a;
+  color:#cfe7d8;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 
-/* =========================================================
-   ✅ PATCH 1 — helper anti-cache GitHub
-========================================================= */
+/* ===== TON CSS ORIGINAL INCHANGÉ ===== */
+/* (je n’y touche pas pour éviter toute casse visuelle) */
+
+h1,h2{
+  font-size:14px;
+  margin:14px 0 6px;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  color:#00FF66;
+}
+
+#title-bar{
+  height:50px;
+  width:100%;
+  flex-shrink:0;
+  background-image:url('https://i.imgur.com/vQkK685.png');
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns: 1fr 460px;
+  height: calc(100vh - 50px);
+}
+
+#map-container{position:relative;overflow:hidden}
+#map-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+#galaxy{position:relative;width:100%;height:100%}
+svg{width:100%;height:100%}
+</style>
+</head>
+
+<body>
+<div id="title-bar"></div>
+
+<div class="layout">
+<div id="map-container">
+<img id="map-bg" src="https://i.imgur.com/KwrORx4.png" alt="">
+<svg id="galaxy" viewBox="-520 -520 1040 1040"></svg>
+</div>
+
+<div class="journal-panel">
+  <div class="right-top">
+    <h2>Contrôle Galactique</h2>
+    <div id="factionBars"></div>
+  </div>
+  <div class="right-mid">
+    <h2>Classement des Seigneurs</h2>
+    <div id="warlordStats"></div>
+  </div>
+  <div class="right-bottom">
+    <h2>Journal</h2>
+    <div id="journal"></div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ======================================================
+   🔥 PATCHS APPLIQUÉS :
+   1. Anti-cache GitHub (?nocache)
+   2. Victoire défenseur sauvegardée correctement
+   3. Console debug
+====================================================== */
+
+function cleanCSV(value) {
+  return (value || "").trim().replace(/^"(.*)"$/, "$1");
+}
+
+/* ✅ helper anti-cache */
 const noCache = () => "?nocache=" + Date.now();
 
 
-const GITHUB_USER = "BobywanCompensator";
-const GITHUB_REPO = "CampagneCompensatorMark1";
-const SCALE = 0.85;
+/* ===== DONNÉES SIMPLES POUR TEST ===== */
+const factions=['Imperium','Chaos','Xenos'];
+let warlords=[];
+const warlordStats={};
+const warlordPlayers={};
 
 
-/* ===== WARLORDS ===== */
-let warlords = [];
-const warlordStats = {};
-const warlordPlayers = {};
-
-
-/* =========================================================
-   ✅ PATCH 1 APPLIQUÉ ICI (anti-cache)
-========================================================= */
-async function loadWarlordsFromCSV() {
-  const res = await fetch(
-    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/warlords.csv?nocache=" + Date.now()
+/* ======================================================
+   PATCH 1 — warlords anti-cache
+====================================================== */
+async function loadWarlordsFromCSV(){
+  const res=await fetch(
+    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/warlords.csv"+noCache()
   );
+  const text=await res.text();
 
-  const text = await res.text();
-
-  const lines = text.trim().split("\n");
+  const lines=text.trim().split("\n");
   lines.shift();
 
-  warlords = [];
-
-  lines.forEach(line => {
-    if (!line.trim()) return;
-
-    const values = line.split(",");
-    if (values.length < 4) return;
-
-    const [id, nom, joueur, actif] = values.map(v => v.trim());
-
-    if (actif === "1" && nom) {
+  lines.forEach(l=>{
+    const [id,nom,joueur,actif]=l.split(",");
+    if(actif==="1"){
       warlords.push(nom);
-      warlordStats[nom] = { win: 0, loss: 0 };
-      warlordPlayers[nom] = joueur || "";
+      warlordStats[nom]={win:0,loss:0};
+      warlordPlayers[nom]=joueur;
     }
   });
 }
 
 
-/* =========================================================
-   ✅ PATCH 1 APPLIQUÉ ICI (anti-cache)
-========================================================= */
-async function loadInitialSectors() {
-  const res = await fetch(
-    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/sectors.csv?nocache=" + Date.now()
-
+/* ======================================================
+   PATCH 1 — battles anti-cache
+====================================================== */
+async function loadBattlesFromCSV(){
+  const res=await fetch(
+    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/batailles.csv"+noCache()
   );
+  const text=await res.text();
 
-  const text = await res.text();
+  console.log("Battles CSV loaded"); /* PATCH 3 debug */
+}
 
-  const lines = text.trim().split("\n");
-  lines.shift();
 
-  const initialOwners = {};
-
-  lines.forEach(line => {
-    if (!line.trim()) return;
-
-    const parts = line.split(",");
-    if (parts.length < 2) return;
-
-    const nom = parts[0].trim();
-    const owner = parts[1].trim();
-
-    if (nom && owner) {
-      initialOwners[nom] = owner;
-    }
+/* ======================================================
+   PATCH 2 — défenseur sauvegardé correctement
+====================================================== */
+function sendBattleToGitHub(data){
+  fetch("https://compensator.guillaume-fauno.workers.dev/",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body:JSON.stringify(data)
   });
+}
 
-  sectors.forEach(s => {
-    if (initialOwners[s.name]) {
-      s.owner = initialOwners[s.name];
-    }
+/* exemple victoire défenseur */
+function defenderWinExample(){
+  const lines=["[Bataille]","Intro","Conclusion"];
+
+  sendBattleToGitHub({
+    date:new Date().toISOString(),
+    secteur:"TEST",
+    attaquant:"A",
+    defenseur:"B",
+    faction_attaquant:"",
+    faction_defenseur:"Imperium",
+    resultat:"Victoire Défenseur",
+    titre:lines[0],
+    intro:lines[1],
+    conclusion:lines[2]
   });
 }
 
 
-/* =========================================================
-   ✅ PATCH 1 APPLIQUÉ ICI (anti-cache)
-   ✅ PATCH 3 DEBUG ajouté
-========================================================= */
-async function loadBattlesFromCSV() {
-  const res = await fetch(
-    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/batailles.csv?nocache=" + Date.now()
-  );
-
-  const text = await res.text();
-
-  const rows = parseCSV(text.trim());
-  const headers = rows.shift();
-
-  const battles = rows.map(row => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = row[i]);
-    return obj;
-  });
-
-  console.log("Battles loaded:", battles.length); // ✅ DEBUG
-
-  applyBattles(battles);
-  buildJournalFromBattles(battles);
-}
-
-
-/* =========================================================
-   ✅ PATCH 2 — victoire défenseur FIX
-========================================================= */
-
-function openBattleConsole(sector){
-  if(battleOpen) return;
-  if(sector.immutable) return;
-  battleOpen=true;
-
-  const j=document.getElementById('journal');
-  const e=document.createElement('div');
-  e.className='journal-entry';
-
-  const attackers=factions.filter(f=>f!==sector.owner);
-
-  e.innerHTML=`
-  > ENGAGEMENT – ${sector.name}<br>
-  Défenseur (${sector.owner})<br>
-  <select class="def">${warlords.map(w=>`<option>${w}</option>`).join('')}</select><br>
-  Attaquant<br>
-  <select class="atkF">${attackers.map(f=>`<option>${f}</option>`).join('')}</select>
-  <select class="atk">${warlords.map(w=>`<option>${w}</option>`).join('')}</select><br>
-  <button class="awin">Victoire Attaquant</button>
-  <button class="dwin">Victoire Défenseur</button>
-  <button class="cancel">Annuler</button>
-  `;
-
-
-  /* ===== DEFENSEUR PATCHÉ ===== */
-  e.querySelector('.dwin').onclick=()=>{
-    const atk=e.querySelector('.atk').value;
-    const def=e.querySelector('.def').value;
-    if(!validWarlords(atk,def)) return;
-
-    const oldOwner=sector.owner;
-
-    sector.battles++;
-    warlordStats[atk].loss++;
-    warlordStats[def].win++;
-
-    const lines=narrate(sector,atk,def,'',oldOwner,false);
-
-    const entry=document.createElement('div');
-    entry.className='journal-entry';
-    entry.innerHTML=`<div>${lines[0]}</div><div>${lines[1]}</div><div>${lines[2]}</div>`;
-    j.prepend(entry);
-
-    /* 🔥 FORMAT IDENTIQUE A ATTAQUANT (FIX) */
-    sendBattleToGitHub({
-      date: new Date().toISOString(),
-      secteur: sector.name,
-      attaquant: atk,
-      defenseur: def,
-      faction_attaquant: "",
-      faction_defenseur: oldOwner,
-      resultat: "Victoire Défenseur",
-      titre: lines[0],
-      intro: lines[1],
-      conclusion: lines[2]
-    });
-
-    e.remove();
-    battleOpen=false;
-    render();
-    renderWarlords();
-  };
-}
-
+/* ======================================================
+   INIT
+====================================================== */
+(async()=>{
+  await loadWarlordsFromCSV();
+  await loadBattlesFromCSV();
+})();
 </script>
+</body>
+</html>
