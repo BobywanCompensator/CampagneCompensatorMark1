@@ -28,7 +28,7 @@ const warlordPlayers = {};
 ========================================================= */
 async function loadWarlordsFromCSV() {
   const res = await fetch(
-    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/warlords.csv" + noCache()
+    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/warlords.csv?nocache=" + Date.now()
   );
 
   const text = await res.text();
@@ -60,7 +60,8 @@ async function loadWarlordsFromCSV() {
 ========================================================= */
 async function loadInitialSectors() {
   const res = await fetch(
-    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/sectors.csv" + noCache()
+    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/sectors.csv?nocache=" + Date.now()
+
   );
 
   const text = await res.text();
@@ -98,7 +99,7 @@ async function loadInitialSectors() {
 ========================================================= */
 async function loadBattlesFromCSV() {
   const res = await fetch(
-    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/batailles.csv" + noCache()
+    "https://raw.githubusercontent.com/BobywanCompensator/CampagneCompensatorMark1/main/data/batailles.csv?nocache=" + Date.now()
   );
 
   const text = await res.text();
